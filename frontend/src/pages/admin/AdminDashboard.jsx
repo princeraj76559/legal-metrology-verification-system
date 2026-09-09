@@ -1,0 +1,4 @@
+import { Card } from '../../components/Card'; import { PageHeader } from '../../components/PageHeader'; import { StatusBadge } from '../../components/StatusBadge';
+const stats = [['Total Applications', 36], ['Submitted', 9], ['Assigned', 12], ['Verified', 15]];
+export function AdminDashboard() { return <><PageHeader title="Admin Dashboard" subtitle="Monitor verification applications and pendency."/><div className="stat-grid">{stats.map(([label,value]) => <Card key={label}><p className="muted">{label}</p><strong className="stat">{value}</strong></Card>)}</div><Card title="Recent applications"><table><thead><tr><th>Application</th><th>Applicant</th><th>Status</th></tr></thead><tbody><tr><td>VER-2026-0001</td><td>Rahul Sharma</td><td><StatusBadge status="SUBMITTED"/></td></tr></tbody></table></Card></>; }
+
