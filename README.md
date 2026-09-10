@@ -1,6 +1,6 @@
-# Legal Metrology Verification System
+# ⚖️ e-Metrology | National Legal Metrology Verification System
 
-A digital platform for the Department of Legal Metrology to manage instrument registrations, verification workflows, on-site field inspections, automated QR-coded digital certificates, and public verification.
+A unified digital platform for the **Department of Legal Metrology** to manage commercial instrument registrations, verification workflows, on-site field inspections, automated QR-coded digital certificates, and instant public verification across **Web and Mobile (Android + PWA)**.
 
 ---
 
@@ -8,221 +8,246 @@ A digital platform for the Department of Legal Metrology to manage instrument re
 
 - [Overview](#-overview)
 - [Key Features](#-key-features)
-- [Role-Based Workflows](#-role-based-workflows)
+- [Role-Based Portals & Workflows](#-role-based-portals--workflows)
 - [System Architecture & Tech Stack](#-system-architecture--tech-stack)
 - [Prerequisites](#-prerequisites)
-- [Getting Started (Step-by-Step)](#-getting-started-step-by-step)
-  - [1. Clone Repository](#1-clone-repository)
-  - [2. Backend Setup](#2-backend-setup)
-  - [3. Frontend Setup](#3-frontend-setup)
-- [Demo Credentials](#-demo-credentials)
-- [End-to-End Verification Walkthrough](#-end-to-end-verification-walkthrough)
-- [Project Directory Structure](#-project-directory-structure)
-- [API Reference](#-api-reference)
-- [Security & Production Notes](#-security--production-notes)
+- [Quick Start: Web Setup](#-quick-start-web-setup)
+- [📱 Mobile App: Android Studio & APK Guide](#-mobile-app-android-studio--apk-guide)
+  - [1. Opening in Android Studio](#1-opening-in-android-studio)
+  - [2. Running on Android Emulator](#2-running-on-android-emulator)
+  - [3. Running on a Physical Phone](#3-running-on-a-physical-phone)
+  - [4. Generating the Installable APK](#4-generating-the-installable-apk)
+  - [5. Continuous Development Sync](#5-continuous-development-sync)
+- [🌐 Progressive Web App (PWA)](#-progressive-web-app-pwa)
+- [🔐 Pre-Seeded Demo Credentials](#-pre-seeded-demo-credentials)
+- [🔄 End-to-End Verification Lifecycle](#-end-to-end-verification-lifecycle)
+- [📁 Project Directory Structure](#-project-directory-structure)
+- [📡 API Reference](#-api-reference)
+- [🔒 Security & Production Guidelines](#-security--production-guidelines)
 
 ---
 
 ## 🌟 Overview
 
-The **Legal Metrology Verification System** replaces paper-based workflows with a unified, transparent digital ecosystem. It streamlines the lifecycle of commercial weights and measures verification—from initial application submission by traders and manufacturers to officer assignment, on-site mobile inspections, tamper-evident certificate issuance, and instant public QR validation.
+The **National Legal Metrology Verification Portal (e-Metrology)** digitizes the end-to-end statutory verification and stamping lifecycle for commercial weights and measures under the *Legal Metrology Act, 2009*.
+
+It provides modern role-based workspaces for **Traders/Manufacturers**, **Legal Metrology Officers (LMO)**, **Government Approved Test Centres (GATC)**, and **Administrators**, coupled with on-site mobile inspection tools, official government-grade PDF certificate issuance, and public QR verification.
 
 ---
 
 ## 🚀 Key Features
 
-* **Role-Based Portals**: Dedicated interfaces for Applicants, Legal Metrology Officers, Admins, and Government Approved Test Centres (GATC).
-* **Instrument Registry**: Register, track, and manage commercial weighing and measuring instruments with serial numbers, model details, and location data.
-* **Smart Workflow & Assignment**: Administrative officer allocation engine filtered by state, district, and workload.
-* **Mobile-First Field Inspection Desk**: Optimized UI for field officers to perform inspections, record test results (PASS / REJECT), attach photo proof, and log physical seal numbers.
-* **Automated Digital Certificate Generation**: Dynamic PDF certificate issuance via `PDFKit` embedded with a cryptographic QR code.
-* **Public QR Verification**: Scan or visit public verification links (`/verify/:token`) without login to verify certificate authenticity, validity dates, and instrument specs.
-* **Audit Trail & Logging**: System-wide immutable logging of every action, status change, and inspection event for governance and accountability.
-* **Zero-Config Database**: Self-initializing SQLite database (`better-sqlite3`) in WAL mode with auto-seeding for quick onboarding.
+* **Modern Design System**: Clean light UI with responsive metrics, status-coded cards, and micro-interactions.
+* **4 Role-Based Workspaces**: Tailored dashboards for Applicants, LMO Officers, GATC Test Labs, and Administrators.
+* **Mobile-First Responsive Drawer**: Slide-out navigation drawer with safe-area notch insets for iOS and Android devices.
+* **Cross-Platform Mobile App**: Fully packaged native Android application powered by **Capacitor** alongside Progressive Web App (PWA) installability.
+* **Smart Verifier Assignment**: Workload-balanced allocation engine matching verifiers by district, state, and active queue counts.
+* **Field Inspection Suite**: On-site inspection desk with standard vs. observed reading comparison, seal logging, and evidence photo uploads.
+* **Official PDF Certificate Generator**: High-resolution bilingual digital certificates rendered with security borders, national seals, validity indicators, and cryptographic QR hashes.
+* **Multi-Identifier Public Verification**: Public `/verify` portal allowing instant lookup via **Certificate Number**, **Application Number**, **Instrument Serial Number**, or **QR Token**.
+* **Zero-Config Database**: Self-initializing SQLite engine (`better-sqlite3`) running in high-performance Write-Ahead Logging (WAL) mode with auto-seeding.
 
 ---
 
-## 👥 Role-Based Workflows
+## 👥 Role-Based Portals & Workflows
 
+```text
+┌─────────────────┐      Submits Application      ┌──────────────────────┐
+│    Applicant    │ ────────────────────────────> │ Admin / Allocator    │
+│ (Manufacturer)  │                               └──────────┬───────────┘
+└─────────────────┘                                          │ Assigns Inspector
+                                                             ▼
+┌─────────────────┐      Issues Certificate       ┌──────────────────────┐
+│  Public Portal  │ <──────────────────────────── │ Legal Metrology      │
+│  (/verify)      │      (Signed PDF + QR Code)   │ Officer / GATC Lab   │
+└─────────────────┘                               └──────────────────────┘
 ```
-┌──────────────┐      Submits Application      ┌──────────────────┐
-│  Applicant   │ ────────────────────────────> │ Admin / Platform │
-└──────────────┘                               └─────────┬────────┘
-                                                         │ Assigns Officer
-                                                         ▼
-┌──────────────┐      Generates Certificate    ┌───────────────────┐
-│    Public    │ <──────────────────────────── │ Legal Metrology   │
-│ Verification │      (QR Code + Signed PDF)   │     Officer/GATC  │
-└──────────────┘                               └───────────────────┘
-```
 
-1. **Applicant (Trader / Manufacturer)**
-   - Register and manage instruments.
-   - Submit new verification / re-verification applications with preferred inspection dates.
-   - Live visual status timeline tracking (`SUBMITTED` ➔ `ASSIGNED` ➔ `VERIFIED` / `REJECTED`).
-   - Download PDF certificates with embedded QR codes.
+1. **Applicant Portal (Trader / Manufacturer)**
+   - Register commercial weighing and measuring instruments with model and serial numbers.
+   - Submit new verification or re-verification applications with preferred scheduling dates.
+   - Track progress across a real-time visual 5-stage timeline (`Submitted` ➔ `Assigned` ➔ `Inspection` ➔ `Result` ➔ `Certificate`).
+   - Download signed digital PDF certificates for all verified applications.
 
-2. **Legal Metrology Officer / Inspector**
-   - View assigned inspection jobs.
-   - Conduct on-site inspections with live photo capture/upload.
-   - Record test findings, verification fees, remarks, and seal numbers.
-   - Issue approvals (generating certificates) or rejections.
+2. **Legal Metrology Officer (LMO) & GATC Laboratory**
+   - View assigned inspection queue and daily scheduled jobs.
+   - Perform on-site field inspections with observed vs. standard calibration readings.
+   - Upload photographic evidence and log physical seal conditions.
+   - Submit inspection findings to automatically generate or reject certificates.
 
-3. **Admin / Controller**
-   - High-level system statistics (pending applications, active officers, issued certificates).
-   - Assign officers to applications based on jurisdiction (state/district).
-   - User and officer management (create, update, activate/deactivate accounts).
-   - Complete audit trail of system activities.
+3. **Administrator Portal**
+   - Monitor real-time analytics: verification rate, pendency queue, expiring certificates, and area-wise workload.
+   - Assign/reassign inspection jobs to officers based on jurisdiction and current workload.
+   - Manage user accounts (Officers, GATC centres, Admins) with self-deactivation protection.
+   - Review immutable system audit logs.
 
-4. **GATC (Government Approved Test Centre)**
-   - Inspection workspace for authorized third-party verification labs.
-
-5. **Public / Enforcement Officers**
-   - Instant validation of certificates via camera scan or web verification link.
+4. **Public Verification (`/verify`)**
+   - Open verification endpoint accessible without login.
+   - Scan physical certificate QR codes or search by Certificate Number, Application Number, or Serial Number.
 
 ---
 
 ## 🛠️ System Architecture & Tech Stack
 
-- **Frontend**: React 18, Vite, Vanilla CSS Design System, Responsive & Mobile-first.
-- **Backend**: Node.js (ES Modules), Express.js REST API.
-- **Database**: SQLite via `better-sqlite3` (Write-Ahead Logging enabled).
-- **Authentication**: JWT (JSON Web Tokens) with `bcryptjs` password hashing.
-- **File & Media Handling**: `multer` for secure on-disk upload of inspection photos.
-- **Certificate & QR Engine**: `pdfkit` for vector PDF rendering + `qrcode` for tokenized digital verification.
+| Component | Technology | Description |
+| :--- | :--- | :--- |
+| **Frontend** | React 18, Vite 5 | Modular SPA with custom responsive design system |
+| **Mobile Runtime** | Capacitor 8 | Native Android wrapper and device bridge |
+| **Backend** | Node.js, Express (ESM) | REST API with JWT authentication & role-based middleware |
+| **Database** | SQLite (`better-sqlite3`) | Fast embedded relational database with WAL mode |
+| **Certificate Engine** | `PDFKit`, `QRCode` | Dual-border official PDF rendering with embedded QR code |
+| **File Storage** | `Multer` | Secure on-disk storage for evidence images and certificates |
 
 ---
 
 ## 📋 Prerequisites
 
-Before running the project, ensure you have the following installed on your machine:
+Ensure the following tools are installed on your machine:
 - **Node.js**: `v18.0.0` or higher ([Download Node.js](https://nodejs.org/))
-- **npm**: `v9.0.0` or higher (bundled with Node.js)
-- **Git**: For version control
+- **npm**: `v9.0.0` or higher
+- **Android Studio** *(Optional, for Android App / APK build)*: ([Download Android Studio](https://developer.android.com/studio))
 
 ---
 
-## ⚡ Getting Started (Step-by-Step)
+## ⚡ Quick Start: Web Setup
 
-### 1. Clone Repository
-
+### 1. Clone the Repository
 ```bash
 git clone <your-repository-url>
 cd legal-metrology-platform
 ```
 
----
-
-### 2. Backend Setup
-
-Open a terminal in the root directory:
-
+### 2. Start Backend Server
 ```bash
-# 1. Navigate to the backend directory
 cd backend
-
-# 2. Create your environment configuration file
-# On Windows (PowerShell / Command Prompt):
-copy .env.example .env
-# On Linux / macOS:
-# cp .env.example .env
-
-# 3. Install backend dependencies
 npm install
-
-# 4. Start the backend development server
 npm run dev
 ```
+> **Backend URL**: `http://localhost:4000` (Database automatically seeds at `backend/storage/legal-metrology.db`).
 
-> **Note:** The backend server will start on `http://localhost:4000`. The SQLite database file will automatically be created and seeded at `backend/storage/legal-metrology.db`.
-
----
-
-### 3. Frontend Setup
-
-Open a **new terminal** in the root directory:
-
+### 3. Start Frontend Web App
+Open a second terminal window:
 ```bash
-# 1. Navigate to the frontend directory
 cd frontend
-
-# 2. Install frontend dependencies
 npm install
-
-# 3. Start the frontend development server
 npm run dev
 ```
-
-> **Note:** The frontend application will start on `http://localhost:5173`. Open this URL in your web browser.
+> **Frontend URL**: `http://localhost:5173`
 
 ---
 
-## 🔐 Demo Credentials
+## 📱 Mobile App: Android Studio & APK Guide
 
-The database comes pre-seeded with sample accounts for all primary roles (all passwords are `Pass@123`):
+The project includes an Android application project located in [`frontend/android`](./frontend/android).
 
-| Role | Email | Password | Default Permissions |
+### 1. Opening in Android Studio
+1. Launch **Android Studio**.
+2. Click **Open** and select the **`frontend/android`** folder inside this repository:
+   ```text
+   frontend/android
+   ```
+3. Wait for Android Studio to finish **Gradle Sync** (shows *`BUILD SUCCESSFUL`* in the bottom status bar).
+
+### 2. Running on Android Emulator
+1. Open **Device Manager** in Android Studio (top-right toolbar) and create/launch a virtual device (e.g. *Pixel 7 / Android 14*).
+2. Ensure your backend is running (`npm run dev` in `backend`).
+3. Click the green **▶ Run** button (or press `Shift + F10`).
+4. The **e-Metrology** app will install and open in the emulator.
+   > **Note**: The app automatically routes API calls to `http://10.0.2.2:4000/api/v1` on Android emulators so no manual IP configuration is required.
+
+### 3. Running on a Physical Phone
+1. Enable **Developer Options** and **USB Debugging** on your Android phone.
+2. Connect your phone to your computer via USB.
+3. Select your phone in Android Studio's top device selector and click **▶ Run**.
+
+### 4. Generating the Installable APK
+To create a standalone `.apk` file that can be installed on any Android device:
+1. In Android Studio's top menu, click:
+   **Build > Build Bundle(s) / APK(s) > Build APK(s)**.
+2. When the build completes, click the **locate** link in the popup notification.
+3. Your installable APK will be ready at:
+   ```text
+   frontend/android/app/build/outputs/apk/debug/app-debug.apk
+   ```
+
+### 5. Continuous Development Sync
+Whenever you modify React UI code in `frontend/src/`, run:
+```bash
+cd frontend
+npm run build:mobile
+```
+This builds the web bundle and syncs assets into the Android native project.
+
+---
+
+## 🌐 Progressive Web App (PWA)
+
+The web frontend includes a Web App Manifest ([`manifest.json`](./frontend/public/manifest.json)). Mobile users visiting `http://localhost:5173` via mobile Chrome or Safari can tap **Add to Home Screen** / **Install App** to install the application without going through an app store.
+
+---
+
+## 🔐 Pre-Seeded Demo Credentials
+
+The database initializes with test accounts across all roles (all passwords: `Pass@123`):
+
+| Role | Email | Password | Primary Functions |
 | :--- | :--- | :--- | :--- |
-| **Applicant** | `applicant@example.com` | `Pass@123` | Register instruments, submit applications, view certificates |
-| **Officer** | `officer@metrology.gov` | `Pass@123` | Perform field inspections, approve/reject tests, attach photos |
-| **Admin** | `admin@metrology.gov` | `Pass@123` | Manage users, allocate officers, audit logs, view analytics |
+| **Applicant** | `applicant@example.com` | `Pass@123` | Register instruments, apply for verification, download certificates |
+| **LMO Officer** | `officer@metrology.gov` | `Pass@123` | Inspect instruments, upload evidence, issue/reject stamps |
+| **GATC Lab** | `gatc@metrology.gov` | `Pass@123` | Authorized third-party test centre inspection desk |
+| **Admin** | `admin@metrology.gov` | `Pass@123` | Allocate officers, manage accounts, review audit trails |
 
 ---
 
-## 🔄 End-to-End Verification Walkthrough
-
-Follow these steps to experience the complete verification lifecycle:
-
-1. **Submit Application (Applicant Portal)**:
-   - Log in as `applicant@example.com` / `Pass@123`.
-   - Go to **My Instruments** and register a new instrument (or use the pre-seeded one).
-   - Go to **New Application**, select your instrument, set a preferred date, and submit.
-   - Note the generated Application Number (e.g., `VER-2026-0001`).
-
-2. **Assign Officer (Admin Portal)**:
-   - Log out and log in as `admin@metrology.gov` / `Pass@123`.
-   - Go to **Applications**, locate the submitted application, and click **Assign Officer**.
-   - Select `Amit Kumar (Officer)` and assign a scheduled date.
-
-3. **Perform Field Inspection (Officer Portal)**:
-   - Log out and log in as `officer@metrology.gov` / `Pass@123`.
-   - Navigate to **My Jobs** to see the assigned task.
-   - Click **Inspect**, select Outcome as **PASS**, enter seal details, remarks, and optionally attach an inspection photo.
-   - Click **Submit Inspection Report**.
-
-4. **View Certificate & Public QR (Applicant & Public)**:
-   - Log back in as `applicant@example.com`.
-   - Navigate to **Certificates** to find your newly generated verification certificate.
-   - Click **Download PDF** to inspect the official generated certificate.
-   - Click **Verify QR Code** to view the public tamper-proof verification page.
-
----
-
-## 📂 Project Directory Structure
+## 🔄 End-to-End Verification Lifecycle
 
 ```text
-legal-metrology-platform/
+1. [Applicant] Register instrument (e.g. Weighing Scale ES-10001) -> Submit Application
+   └── Generates: Application Number (e.g., VER-2026-0001)
+
+2. [Admin] Review pending queue -> Assign to LMO Officer / GATC with inspection date
+   └── Status updates to: ASSIGNED
+
+3. [Officer] Open assigned job -> Record observed reading (10.00 kg) vs standard reading (10.00 kg)
+   └── Upload photo evidence -> Submit with PASS result
+
+4. [System] Automatically generates tamper-proof PDF certificate with QR code
+   └── Certificate Number (e.g., LMS-2026-0001)
+
+5. [Applicant & Public] Download signed PDF certificate from dashboard or verify via /verify/LMS-2026-0001
+```
+
+---
+
+## 📁 Project Directory Structure
+
+```text
+.
 ├── backend/
 │   ├── src/
-│   │   ├── db.js             # SQLite schema, connections, and seed data
-│   │   ├── server.js         # Express server, routes, controllers & PDF engine
-│   │   └── middleware/       # JWT auth and role validation guards
-│   ├── storage/              # (Auto-generated) SQLite DB, uploads & certificate files
-│   ├── .env.example          # Environment variables template
+│   │   ├── db.js                 # SQLite schema, tables & automatic seed data
+│   │   ├── server.js             # Express API server, routes, CORS & PDF engine
+│   │   ├── middleware/           # JWT auth & audit logging middleware
+│   │   └── routes/               # Modular route handlers (auth, admin, apps, officer, certs)
+│   ├── storage/                  # SQLite database, uploaded photos & generated PDFs
 │   └── package.json
 ├── frontend/
+│   ├── android/                  # Native Android Studio Project (Capacitor)
+│   │   ├── app/                  # Android app sources, manifest & resources
+│   │   └── build.gradle          # Android build configuration
+│   ├── public/
+│   │   └── manifest.json         # PWA Web App Manifest
 │   ├── src/
-│   │   ├── components/       # UI components (Buttons, Modals, Cards, Badges, Timeline)
-│   │   ├── pages/            # Application pages and role views
-│   │   ├── services/         # API integration client
-│   │   ├── App.jsx           # Master application layout, routing & state
-│   │   ├── index.css         # Design system & styles
+│   │   ├── components/           # UI components (PageHeader, Modal, StatusTimeline, Icons)
+│   │   ├── pages/                # Admin, Officer & Profile views
+│   │   ├── services/             # Dynamic API client auto-routing web & mobile
+│   │   ├── styles/               # Bento Light theme & mobile drawer responsive CSS
+│   │   ├── App.jsx               # Master state, role routing & public verify views
 │   │   └── main.jsx
-│   ├── index.html
+│   ├── capacitor.config.json     # Capacitor mobile container configuration
 │   └── package.json
 ├── docs/
-│   └── API-CONTRACT.md       # Standardized API contract & endpoint schemas
-├── .gitignore
+│   └── API-CONTRACT.md           # REST API endpoints & request/response schemas
 └── README.md
 ```
 
@@ -230,31 +255,31 @@ legal-metrology-platform/
 
 ## 📡 API Reference
 
-Base Endpoint: `http://localhost:4000/api/v1`
+Base URL: `http://localhost:4000/api/v1`
 
 | Method | Endpoint | Access | Description |
 | :--- | :--- | :--- | :--- |
-| `POST` | `/auth/login` | Public | Authenticate user & receive JWT token |
+| `POST` | `/auth/login` | Public | Login with credentials & receive JWT token |
 | `POST` | `/auth/register` | Public | Register a new applicant account |
-| `GET` | `/instruments` | Authenticated | List instruments owned by the applicant |
-| `POST` | `/instruments` | Applicant | Register a new weighing/measuring instrument |
-| `GET` | `/applications/my` | Applicant | Retrieve current user's applications |
+| `GET` | `/instruments` | Authenticated | List registered instruments |
+| `POST` | `/instruments` | Applicant | Register a new weighing / measuring instrument |
+| `GET` | `/applications/my` | Applicant | Retrieve user's applications with certificate details |
 | `POST` | `/applications` | Applicant | Submit a new verification application |
-| `GET` | `/applications` | Admin | List all system applications with filters |
-| `PATCH`| `/applications/:id/assign` | Admin | Assign an officer and inspection date |
-| `GET` | `/officer/jobs` | Officer | List jobs assigned to the logged-in officer |
-| `POST` | `/applications/:id/inspection` | Officer | Submit inspection report and issue certificate |
-| `GET` | `/certificates/my` | Applicant | List user's valid verification certificates |
-| `GET` | `/certificates/:certNumber/pdf` | Authenticated | Download signed digital certificate PDF |
-| `GET` | `/public/verify/:qrToken` | Public | Publicly verify certificate validity via QR token |
+| `GET` | `/admin/applications` | Admin | List all applications with status & district filters |
+| `PATCH`| `/admin/assign/:id` | Admin | Assign verifier and scheduled date |
+| `GET` | `/officer/jobs` | Officer / GATC | List assigned inspection jobs |
+| `POST` | `/officer/inspection/:id` | Officer / GATC | Submit inspection report and generate certificate |
+| `GET` | `/certificates/my` | Applicant | List issued digital verification certificates |
+| `GET` | `/certificates/download/:id`| Authenticated | Download official certificate PDF |
+| `GET` | `/certificates/verify/:token` | Public | Verify authenticity by Certificate No, App No, Serial No, or QR Token |
 
-For full payload contracts, see [`docs/API-CONTRACT.md`](file:///c:/Users/princ/Documents/Codex/2026-09-09/automate/legal-metrology-platform/docs/API-CONTRACT.md).
+Full API documentation available in [`docs/API-CONTRACT.md`](./docs/API-CONTRACT.md).
 
 ---
 
-## 🔒 Security & Production Notes
+## 🔒 Security & Production Guidelines
 
-- **JWT Secret**: Change `JWT_SECRET` in `backend/.env` to a cryptographically secure key before deploying.
-- **CORS & Public URLs**: Update `FRONTEND_URL` and `PUBLIC_APP_URL` in `backend/.env` to match your production domain.
-- **Persistent Storage**: When hosting the backend on platforms like Render or Railway, attach a persistent volume to `backend/storage/` so SQLite databases and uploaded photos persist across server restarts.
-
+1. **Environment Secrets**: Update `JWT_SECRET` in `backend/.env` with a strong cryptographic key before deploying.
+2. **CORS & Domain URLs**: Configure `FRONTEND_URL` and `PUBLIC_APP_URL` in `backend/.env` to match your deployed domains.
+3. **Data Persistence**: Ensure the `backend/storage/` folder is mounted to a persistent volume when hosting on cloud container providers (e.g. Render, Railway, AWS ECS).
+4. **Android Production Signing**: For Google Play Store publishing, generate a release keystore in Android Studio via **Build > Generate Signed Bundle / APK**.

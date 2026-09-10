@@ -418,4 +418,4 @@ app.use((err, _, res, __) => {
   fail(res, "Unexpected server error", {}, 500);
 });
 
-app.listen(port, () => console.log(`API running at http://localhost:${port}`));
+app.listen(port, "0.0.0.0", () => console.log(`API running at http://0.0.0.0:${port}`));

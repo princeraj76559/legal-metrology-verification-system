@@ -235,26 +235,36 @@ function Auth({ onLogin }) {
 
 function Shell({ session, onLogout }) {
   const [section, setSection] = useState("Dashboard");
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const current = menus[session.user.role] || [];
 
   const roleLabels = { APPLICANT: "APPLICANT PORTAL", ADMIN: "ADMINISTRATOR", OFFICER: "LMO OFFICER", GATC: "GATC LABORATORY" };
 
+  const handleNav = (item) => {
+    setSection(item);
+    setMobileMenuOpen(false);
+  };
+
   return (
-    <div className="app-shell">
-      <aside className="sidebar">
+    <div className={`app-shell ${mobileMenuOpen ? "mobile-menu-open" : ""}`}>
+      {mobileMenuOpen && (
+        <div className="mobile-overlay" onClick={() => setMobileMenuOpen(false)} />
+      )}
+      <aside className={`sidebar ${mobileMenuOpen ? "open" : ""}`}>
         <div className="brand">
           <Icon name="brandLogo" />
           <div className="brand-text">
             <span>Legal Metrology</span>
             <small>National Portal</small>
           </div>
+          <button className="mobile-close-btn" type="button" onClick={() => setMobileMenuOpen(false)} aria-label="Close menu">✕</button>
         </div>
         <nav>
           {current.map((item) => (
             <button
               key={item}
               className={section === item ? "active" : ""}
-              onClick={() => setSection(item)}
+              onClick={() => handleNav(item)}
             >
               <span className="nav-icon"><Icon name={navIconName(item)} size={18} /></span>
               <span>{item}</span>
@@ -269,6 +279,9 @@ function Shell({ session, onLogout }) {
 
       <main className="main">
         <header className="topbar">
+          <button className="mobile-menu-toggle" type="button" onClick={() => setMobileMenuOpen(true)} aria-label="Open menu">
+            <span style={{ fontSize: 18, lineHeight: 1 }}>☰</span>
+          </button>
           <span className="topbar-role">{roleLabels[session.user.role] || session.user.role}</span>
           <div className="topbar-user">
             <span className="avatar">{session.user.name?.[0]?.toUpperCase() || "U"}</span>

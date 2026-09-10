@@ -1,0 +1,9 @@
+{
+  "appId": "in.gov.metrology.app",
+  "appName": "e-Metrology",
+  "webDir": "dist",
+  "server": {
+    "androidScheme": "http",
+    "cleartext": true
+  }
+}

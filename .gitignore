@@ -1,6 +1,49 @@
+# Dependencies
 node_modules/
+.npm-cache/
+
+# Production builds & dist
 dist/
+build/
+bin/
+out/
+
+# Environment secrets
 .env
 .env.local
-backend/storage/
-.npm-cache/
+.env.*.local
+*.local
+
+# Database & runtime storage
+backend/storage/*.db
+backend/storage/*.db-journal
+backend/storage/*.db-wal
+backend/storage/*.db-shm
+backend/storage/uploads/*
+backend/storage/certificates/*
+!backend/storage/.gitkeep
+!backend/storage/uploads/.gitkeep
+!backend/storage/certificates/.gitkeep
+
+# Android & Gradle artifacts
+.gradle/
+frontend/android/.gradle/
+frontend/android/app/build/
+frontend/android/build/
+frontend/android/local.properties
+frontend/android/.idea/
+frontend/android/captures/
+frontend/android/.cxx/
+frontend/android/.externalNativeBuild/
+*.apk
+*.aar
+*.aab
+
+# IDE & OS files
+.idea/
+.vscode/
+*.iml
+.DS_Store
+Thumbs.db
+*.log
+
